@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
-
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.views.generic import (TemplateView,ListView,
                                   DetailView,CreateView,
                                   UpdateView,DeleteView)
@@ -69,7 +70,7 @@ def post_publish(request, pk):
     post.publish()
     return redirect('post_detail', pk=pk)
 
-@login_required
+@method_decorator(csrf_exempt, name='dispatch')
 def add_comment_to_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -84,14 +85,14 @@ def add_comment_to_post(request, pk):
     return render(request, 'blog/comment_form.html', {'form': form})
 
 
-@login_required
+
 def comment_approve(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     comment.approve()
     return redirect('post_detail', pk=comment.post.pk)
 
 
-@login_required
+
 def comment_remove(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
     post_pk = comment.post.pk
